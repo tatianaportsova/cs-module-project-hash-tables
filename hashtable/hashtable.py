@@ -1,3 +1,8 @@
+# python3 hashtable/hashtable.py -v
+# python3 hashtable/test_hashtable.py -v
+# python3 hashtable/test_hashtable_no_collisions.py -v
+# python3 hashtable/test_hashtable_resize.py -v
+
 class HashTableEntry:
     """
     Linked List hash table key/value pair
@@ -20,8 +25,10 @@ class HashTable:
     Implement this.
     """
 
-    def __init__(self, capacity):
-        # Your code here
+    def __init__(self, capacity = MIN_CAPACITY):
+        self.capacity = capacity
+        self.size = 0
+        self.storage = [None] * self.capacity
 
 
     def get_num_slots(self):
@@ -34,7 +41,7 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        return self.capacity
 
 
     def get_load_factor(self):
@@ -43,7 +50,8 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        load_factor = self.size / self.capacity
+        return load_factor
 
 
     def fnv1(self, key):
@@ -52,8 +60,16 @@ class HashTable:
 
         Implement this, and/or DJB2.
         """
+        #Constants
+        FNV_prime = 1099511628211
+        offset_basis = 14695981039346656037
 
-        # Your code here
+        #FNV-1a Hash Function
+        hash = offset_basis
+        for char in key:
+            hash = hash * FNV_prime
+            hash = hash ^ ord(char)
+        return hash
 
 
     def djb2(self, key):
@@ -62,7 +78,10 @@ class HashTable:
 
         Implement this, and/or FNV-1.
         """
-        # Your code here
+        hash = 5381
+        for i in key:
+            hash = ((hash << 5) + hash) + ord(i)
+        return hash & 0xFFFFFFFF
 
 
     def hash_index(self, key):
@@ -70,7 +89,7 @@ class HashTable:
         Take an arbitrary key and return a valid integer index
         between within the storage capacity of the hash table.
         """
-        #return self.fnv1(key) % self.capacity
+        # return self.fnv1(key) % self.capacity
         return self.djb2(key) % self.capacity
 
     def put(self, key, value):
@@ -81,8 +100,23 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        index = self.hash_index(key)
 
+        if self.storage[index] == None:
+            self.storage[index] = []
+            self.storage[index].append([key, value])
+            self.size +=1
+
+        elif self.storage[index] != None:
+            for k in self.storage[index]:
+                if k[0] == key:
+                    k[1] = value
+                    break
+            else:
+                self.storage[index].append([key, value])
+                self.size +=1
+
+        
 
     def delete(self, key):
         """
@@ -92,7 +126,16 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        index = self.hash_index(key)
+
+        if self.storage[index] != None:
+            for k in self.storage[index]:
+                if k[0] == key:
+                    k[0] = None
+                    k[1] = None
+                self.size -= 1
+        else:
+            return None
 
 
     def get(self, key):
@@ -103,7 +146,12 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        index = self.hash_index(key)
+
+        if self.storage[index] != None:
+            for k in self.storage[index]:
+                if k[0] == key:
+                    return k[1]
 
 
     def resize(self, new_capacity):
@@ -113,7 +161,22 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        extended_hash = HashTable(new_capacity)
+
+        for i in range(0, self.capacity):
+            if self.storage[i] is None:
+                continue
+            
+            # Since our list is now a different length,
+            # we need to re-add all of our values to 
+            # the new list for its hash to return correct
+            # index.
+            for k in self.storage[i]:
+                extended_hash.put(k[0], k[1])
+
+        self.capacity = new_capacity
+        self.storage = extended_hash.storage
+
 
 
 
