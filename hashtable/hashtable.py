@@ -10,6 +10,7 @@ class HashTableEntry:
     def __init__(self, key, value):
         self.key = key
         self.value = value
+        self.previous = None
         self.next = None
 
 
@@ -27,6 +28,8 @@ class HashTable:
 
     def __init__(self, capacity = MIN_CAPACITY):
         self.capacity = capacity
+        if self.capacity < MIN_CAPACITY:
+            raise TypeError("MINIMUM CAPACITY is 8")
         self.size = 0
         self.storage = [None] * self.capacity
 
@@ -100,23 +103,52 @@ class HashTable:
 
         Implement this.
         """
+        new_entry = HashTableEntry(key, value)
         index = self.hash_index(key)
 
         if self.storage[index] == None:
-            self.storage[index] = []
-            self.storage[index].append([key, value])
+            self.storage[index] = new_entry
             self.size +=1
 
-        elif self.storage[index] != None:
-            for k in self.storage[index]:
-                if k[0] == key:
-                    k[1] = value
-                    break
-            else:
-                self.storage[index].append([key, value])
-                self.size +=1
+            if self.get_load_factor() > 0.7:
+                self.resize(self.capacity*2)
 
-        
+        elif self.storage[index] != None:
+            current = self.storage[index]
+
+            while current.next is not None:
+                if current.key == new_entry.key:
+                    current.value = new_entry.value
+                    break
+                current = current.next
+
+            else:
+                if current.key == new_entry.key:
+                    current.value = new_entry.value
+                else:
+                    current.next = new_entry
+                    current.next.previous = current
+                    self.size +=1
+
+                    if self.get_load_factor() > 0.7:
+                        self.resize(self.capacity*2)
+
+        # index = self.hash_index(key)
+
+        # if self.storage[index] == None:
+        #     self.storage[index] = []
+        #     self.storage[index].append([key, value])
+        #     self.size +=1
+
+        # elif self.storage[index] != None:
+        #     for k in self.storage[index]:
+        #         if k[0] == key:
+        #             k[1] = value
+        #             break
+        #     else:
+        #         self.storage[index].append([key, value])
+        #         self.size +=1
+ 
 
     def delete(self, key):
         """
@@ -129,13 +161,48 @@ class HashTable:
         index = self.hash_index(key)
 
         if self.storage[index] != None:
-            for k in self.storage[index]:
-                if k[0] == key:
-                    k[0] = None
-                    k[1] = None
-                self.size -= 1
-        else:
-            return None
+            current = self.storage[index]
+
+            while current.next is not None:
+                if current.key == key:
+                    if current.previous == None:
+                        current.next.previous = None
+                        self.storage[index] = current.next
+                    else:
+                        current.previous.next = current.next
+                        current.next.previous = current.previous
+                    self.size -=1
+
+                    if self.get_load_factor() < 0.2:
+                        if self.capacity // 2 >= MIN_CAPACITY:
+                            self.resize(self.capacity // 2)
+
+                current = current.next
+
+            else:
+                if current.key == key:
+                    if current.previous == None:
+                        self.storage[index] = None
+                    else:
+                        current.previous.next = None
+                    self.size -=1
+
+                    if self.get_load_factor() < 0.2:
+                        if self.capacity // 2 >= MIN_CAPACITY:
+                            self.resize(self.capacity // 2)
+        
+        return None
+
+        # index = self.hash_index(key)
+
+        # if self.storage[index] != None:
+        #     for k in self.storage[index]:
+        #         if k[0] == key:
+        #             k[0] = None
+        #             k[1] = None
+        #         self.size -= 1
+        # else:
+        #     return None
 
 
     def get(self, key):
@@ -149,9 +216,22 @@ class HashTable:
         index = self.hash_index(key)
 
         if self.storage[index] != None:
-            for k in self.storage[index]:
-                if k[0] == key:
-                    return k[1]
+            current = self.storage[index]
+
+            while current is not None:
+                if current.key == key:
+                    return current.value
+
+                current = current.next
+
+        return None
+
+        # index = self.hash_index(key)
+
+        # if self.storage[index] != None:
+        #     for k in self.storage[index]:
+        #         if k[0] == key:
+        #             return k[1]
 
 
     def resize(self, new_capacity):
@@ -166,16 +246,31 @@ class HashTable:
         for i in range(0, self.capacity):
             if self.storage[i] is None:
                 continue
-            
-            # Since our list is now a different length,
-            # we need to re-add all of our values to 
-            # the new list for its hash to return correct
-            # index.
-            for k in self.storage[i]:
-                extended_hash.put(k[0], k[1])
+
+            else:
+                current = self.storage[i]
+                while current is not None:
+                    extended_hash.put(current.key, current.value)
+                    current = current.next
 
         self.capacity = new_capacity
         self.storage = extended_hash.storage
+        
+        # extended_hash = HashTable(new_capacity)
+
+        # for i in range(0, self.capacity):
+        #     if self.storage[i] is None:
+        #         continue
+            
+        #     # Since our list is now a different length,
+        #     # we need to re-add all of our values to 
+        #     # the new list for its hash to return correct
+        #     # index.
+        #     for k in self.storage[i]:
+        #         extended_hash.put(k[0], k[1])
+
+        # self.capacity = new_capacity
+        # self.storage = extended_hash.storage
 
 
 
