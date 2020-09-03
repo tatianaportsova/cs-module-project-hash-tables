@@ -1,3 +1,5 @@
+# python3 applications/sumdiff/sumdiff.py
+
 """
 find all a, b, c, d in q such that
 f(a) + f(b) = f(c) - f(d)

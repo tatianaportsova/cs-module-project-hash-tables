@@ -1,5 +1,18 @@
+# python3 applications/no_dups/no_dups.py
+# python3 applications/no_dups/test_no_dups.py
+
 def no_dups(s):
-    # Your code here
+    s = s.split(' ')
+    dict_ = {}
+    
+    for i in range(0, len(s)):
+        if s[i] in dict_:
+            continue
+        else:
+            dict_[s[i]] = i
+            
+    separator = ' '
+    return separator.join(list(dict_.keys()))
 
 
 
