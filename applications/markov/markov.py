@@ -25,20 +25,42 @@ def write_sent(num_of_sent, words_dict):
     sentences = []
     for i in range(1, num_of_sent+1):
         k = []
-        length = random.randint(1, 10)
-        num_words = 0
+        punc = '.?!'
+
         word = random.choice(list(dict_.keys()))
-        while num_words < length:
-            k.append(word)
-            num_words += 1
-            if word not in words_dict:
-                word = random.choice(list(dict_.keys()))
-            else:
+        while  word[0].isupper() == False or word[0] != '"' and word[1].isupper() == False:
+            if word[0].isupper() == True or word[0] == '"' and word[1].isupper() == True:
+                break
+            word = random.choice(list(dict_.keys()))
+        k.append(word)
+
+        word = random.choice(list(dict_[word]))
+
+        while word[-1] not in punc or word[-1] != '"' and word[-2] not in punc:
+            if word[-1] in punc or word[-1] == '"' and word[-2] in punc:
+                break
+            if word in dict_:
                 word = random.choice(list(dict_[word]))
+                k.append(word)
+            else:
+                word = random.choice(list(dict_.keys()))
+
         sentences.append(k)
     
     return sentences
+        # word = random.choice(list(dict_.keys()))
+        # while num_words < length:
+        #     k.append(word)
+        #     num_words += 1
+        #     if word not in words_dict:
+        #         word = random.choice(list(dict_.keys()))
+        #     else:
+        #         word = random.choice(list(dict_[word]))
+        # sentences.append(k)
+    
 
 for i in write_sent(5, dict_):
         separator = ' '
-        print((separator.join(i)).capitalize(),"\n")
+        print((separator.join(i)).capitalize(),'\n----\n')
+
+

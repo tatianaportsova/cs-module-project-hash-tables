@@ -1,22 +1,18 @@
 # python3 applications/expensive_seq/expensive_seq.py
+# python3 applications/expensive_seq/test_expseq.py
 
-# Your code here
-
-cache = {}
+cache ={}
 
 def expensive_seq(x, y, z):
-    if x <= 0: y + z
+    key = str(x)+','+str(y)+','+str(z)
 
-    if x >  0: expensive_seq(x-1,y+1,z) + expensive_seq(x-2,y+2,z*2) + expensive_seq(x-3,y+3,z*3)
+    if key not in cache:
+        if x <= 0:
+            cache[key] = y + z
+        else:
+            cache[key] = expensive_seq(x-1,y+1,z) + expensive_seq(x-2,y+2,z*2) + expensive_seq(x-3,y+3,z*3)
     
-    # if n <= 1:
-	# 	return n
-
-	# if n not in cache:
-	# 	cache[n] = fib(n-1) + fib(n-2)
-
-	# return cache[n]
-
+    return cache[key]
 
 
 if __name__ == "__main__":
@@ -25,3 +21,4 @@ if __name__ == "__main__":
         print(f"{i*2} {i*3} {i*4} = {x}")
 
     print(expensive_seq(150, 400, 800))
+    
